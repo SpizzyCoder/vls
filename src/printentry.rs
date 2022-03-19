@@ -117,21 +117,21 @@ pub fn print_header(flags: &Flags) {
   print!["  "];
   
   if flags.show_creation_date {
-    print!["{:22}","Created"];
+    print!["{:^22}","Created"];
   }
   
   if flags.show_modification_date {
-    print!["{:22}","Last modified"];
+    print!["{:^22}","Last modified"];
   }
   
   if flags.show_access_date {
-    print!["{:22}","Last accessed"];
+    print!["{:^22}","Last accessed"];
   }
   
   if flags.show_size {
     match flags.format {
-      Format::Si => print!["{:12}","Size"],
-      Format::Iec => print!["{:13}","Size"]
+      Format::Si => print!["{:^12}","Size"],
+      Format::Iec => print!["{:^13}","Size"]
     };
   }
   
