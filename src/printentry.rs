@@ -129,7 +129,10 @@ pub fn print_header(flags: &Flags) {
   }
   
   if flags.show_size {
-    print!["{:12}","Size"];
+    match flags.format {
+      Format::Si => print!["{:12}","Size"],
+      Format::Iec => print!["{:13}","Size"]
+    };
   }
   
   println!["Name"];
