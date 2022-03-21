@@ -1,15 +1,19 @@
+BUILD = cargo build --release
+LINUX_DESTINATION = /bin/vls
+WINDOWS_DESTINATION = C:\bin\vls.exe
+
 .PHONY: linuxinstall linuxuninstall windowsinstall windowsuninstall
 
 linuxinstall:
-	cargo build --release
-	sudo mv target/release/vls /bin
+	$(BUILD)
+	sudo mv target/release/vls $(LINUX_DESTINATION)
 
 linuxuninstall:
-	sudo rm /bin/vls
+	sudo rm $(LINUX_DESTINATION)
 
 windowsinstall:
-	cargo build --release
-	move target\release\vls.exe C:\bin
+	$(BUILD)
+	move target\release\vls.exe $(WINDOWS_DESTINATION)
 
 windowsuninstall:
-	del C:\vls.exe
+	del $(WINDOWS_DESTINATION)
