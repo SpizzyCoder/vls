@@ -1,7 +1,11 @@
 use std::fs;
 use std::fs::Metadata;
-use std::path::Path;
+use std::path::{Path,PathBuf};
+use std::io::Write;
+use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 use crate::flags::Flags;
+
+mod colors;
 
 #[derive(Clone)]
 #[derive(Copy)]
@@ -21,7 +25,8 @@ pub struct PrintEntry {
   modification_date: String,
   access_date: String,
   size: u64,
-  error: Option<String>
+  error: Option<String>,
+  path: PathBuf
 }
 
 const DATE_TIME_NODATA: &'static str = "---------- --:--:--";
@@ -48,7 +53,8 @@ impl PrintEntry {
       access_date: format!["{}",DATE_TIME_NODATA],
       size: 0,
       name: format!["{}",path.file_name().unwrap().to_str().unwrap()],
-      error: None
+      error: None,
+      path: path.to_path_buf()
     };
     
     let metadata: Metadata = match fs::metadata(path) {
@@ -103,11 +109,23 @@ impl PrintEntry {
       print!["[{}] ",get_human_readable_size(flags.format,self.size)];
     }
     
-    print!["{}",self.name];
+    let mut stdout = StandardStream::stdout(ColorChoice::Always);
+    match stdout.set_color(ColorSpec::new().set_fg(Some(colors::get_color(&self.path)))) {
+      Ok(_) => write![&mut stdout,"{}",self.name].unwrap(),
+      Err(_) => print!["{}",self.name]
+    };
     
     if self.error.is_some() {
-      print![" -> {}",self.error.as_ref().unwrap()];
+      match stdout.set_color(ColorSpec::new().set_fg(Some(Color::Red))) {
+        Ok(_) => write![&mut stdout," -> {}",self.error.as_ref().unwrap()].unwrap(),
+        Err(_) => print![" -> {}",self.error.as_ref().unwrap()]
+      };
     }
+    
+    match stdout.set_color(ColorSpec::new().set_fg(None)) {
+      Ok(_) => {},
+      Err(_) => {}
+    };
     
     println![];
   }
