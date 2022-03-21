@@ -1,7 +1,6 @@
 use std::fs;
 use std::fs::Metadata;
 use std::path::{Path,PathBuf};
-use std::io::Write;
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 use crate::flags::Flags;
 
@@ -110,22 +109,15 @@ impl PrintEntry {
     }
     
     let mut stdout = StandardStream::stdout(ColorChoice::Always);
-    match stdout.set_color(ColorSpec::new().set_fg(Some(colors::get_color(&self.path)))) {
-      Ok(_) => write![&mut stdout,"{}",self.name].unwrap(),
-      Err(_) => print!["{}",self.name]
-    };
+    let _ = stdout.set_color(ColorSpec::new().set_fg(Some(colors::get_color(&self.path))));
+    print!["{}",self.name];
     
     if self.error.is_some() {
-      match stdout.set_color(ColorSpec::new().set_fg(Some(Color::Red))) {
-        Ok(_) => write![&mut stdout," -> {}",self.error.as_ref().unwrap()].unwrap(),
-        Err(_) => print![" -> {}",self.error.as_ref().unwrap()]
-      };
+      let _ = stdout.set_color(ColorSpec::new().set_fg(Some(Color::Red)));
+      print![" -> {}",self.error.as_ref().unwrap()];
     }
     
-    match stdout.set_color(ColorSpec::new().set_fg(None)) {
-      Ok(_) => {},
-      Err(_) => {}
-    };
+    let _ = stdout.reset();
     
     println![];
   }
