@@ -21,10 +21,10 @@ const AUDIO_EXTENSIONS: &'static [&'static str] = &[
 ];
 
 const ARCHIVE_EXTENSIONS: &'static [&'static str] = &[
-  "iso" , "tar", "bz2", "gz" , "lz"  , "lz4",
-  "lzma", "lzo", "rz" , "xz" , "z"   , "zst",
-  "7z"  , "s7z", "rar", "tgz", "tbz2", "tlz",
-  "txz" , "zip", "zipx"
+  "iso" , "tar", "bz2" , "gz" , "lz"  , "lz4",
+  "lzma", "lzo", "rz"  , "xz" , "z"   , "zst",
+  "7z"  , "s7z", "rar" , "tgz", "tbz2", "tlz",
+  "txz" , "zip", "zipx", "jar"
 ];
 
 const VIDEO_EXTENSIONS: &'static [&'static str] = &[
