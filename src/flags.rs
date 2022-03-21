@@ -50,6 +50,6 @@ pub fn get_help() -> &'static str {
     "  -s | --size: Show size\n",
     "  --show-sys: Show dotfiles\n",
     "  --si: Show size in SI format\n",
-    "  --iec: Show size in SI format\n"
+    "  --iec: Show size in IEC format\n"
   ]
 }
