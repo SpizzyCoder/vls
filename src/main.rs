@@ -1,6 +1,6 @@
 use std::env;
 use std::fs;
-use std::fs::{ReadDir,DirEntry};
+use std::fs::ReadDir;
 use std::path::Path;
 
 mod printentry;
@@ -46,22 +46,13 @@ fn list_dir(path: &Path,flags: &Flags) -> Result<(),String> {
   };
   
   printentry::print_header(flags);
-
-  let mut entries: Vec<PrintEntry> = Vec::new();
-  for dir_entry in dir_iterator {
-    let dir_entry: DirEntry = match dir_entry {
-      Ok(dir_entry) => dir_entry,
-      Err(_) => continue
-    };
-    
-    entries.push(PrintEntry::new(&dir_entry.path()));
-  }
   
+  let mut entries: Vec<PrintEntry> = dir_iterator.filter_map(|x| x.ok())
+                                                 .map(|x| PrintEntry::new(&x.path()))
+                                                 .collect();
   entries.sort();
   
-  for entry in entries {
-    entry.print(flags);
-  }
+  entries.iter().for_each(|x| x.print(flags));
 
   return Ok(())
 }
