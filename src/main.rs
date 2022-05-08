@@ -12,7 +12,7 @@ use flags::Flags;
 fn main() {
   let args: Vec<String> = env::args().collect();
 
-  if args.len() > 1 && (args[1].to_lowercase() == "help" || args[1].to_lowercase() == "--help") {
+  if args.len() > 1 && (args[1].to_lowercase() == "-h" || args[1].to_lowercase() == "--help") {
     println!["=== [Help] {} v{}",env!["CARGO_PKG_NAME"],env!["CARGO_PKG_VERSION"]];
     print!["{}",flags::get_help()];
     return
