@@ -14,14 +14,14 @@ const DEFAULT_FORMAT: Format = Format::Iec;
 impl Flags {
   pub fn new(args: &[String]) -> Result<Self,String> {
     let flags: Self = Self {
-      show_creation_date:     args[..].contains(&"-c".to_string()) || args[..].contains(&"--creation".to_string()),
-      show_modification_date: args[..].contains(&"-m".to_string()) || args[..].contains(&"--modification".to_string()),
-      show_access_date:       args[..].contains(&"-a".to_string()) || args[..].contains(&"--access".to_string()),
-      show_size:              args[..].contains(&"-s".to_string()) || args[..].contains(&"--size".to_string()),
-      show_sys:               args[..].contains(&"--show-sys".to_string()),
+      show_creation_date:     args.iter().any(|x| x == "-c" || x == "--creation"),
+      show_modification_date: args.iter().any(|x| x == "-m" || x == "--modification"),
+      show_access_date:       args.iter().any(|x| x == "-a" || x == "--access"),
+      show_size:              args.iter().any(|x| x == "-s" || x == "--size"),
+      show_sys:               args.iter().any(|x| x == "--show-sys"),
       format: {
-        let si: bool = args[..].contains(&"--si".to_string());
-        let iec: bool = args[..].contains(&"--iec".to_string());
+        let si: bool = args.iter().any(|x| x == "--si");
+        let iec: bool = args.iter().any(|x| x == "--iec");
           
         if si && iec {
           return Err(format!["Either SI format or IEC"])
