@@ -65,17 +65,17 @@ impl PrintEntry {
     };
     
     if let Ok(time) = metadata.created() {
-      let datetime: chrono::DateTime<chrono::Utc> = time.into();
+      let datetime: chrono::DateTime<chrono::Local> = time.into();
       print_entry.creation_date = format!["{}",datetime.format(DATE_TIME_FORMAT)]
     }
     
     if let Ok(time) = metadata.modified() {
-      let datetime: chrono::DateTime<chrono::Utc> = time.into();
+      let datetime: chrono::DateTime<chrono::Local> = time.into();
       print_entry.modification_date = format!["{}",datetime.format(DATE_TIME_FORMAT)]
     }
     
     if let Ok(time) = metadata.accessed() {
-      let datetime: chrono::DateTime<chrono::Utc> = time.into();
+      let datetime: chrono::DateTime<chrono::Local> = time.into();
       print_entry.access_date = format!["{}",datetime.format(DATE_TIME_FORMAT)]
     }
     
