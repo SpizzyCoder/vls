@@ -5,7 +5,7 @@ vls is also cross-platform.
 
 # Building
 ```
-git clone https://gitlab.com/SpizzyCoder/vls.git
+git clone https://github.com/SpizzyCoder/vls.git
 cd vls
 cargo install --path .
 ```
