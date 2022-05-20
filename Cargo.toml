@@ -1,6 +1,6 @@
 [package]
 name = "vls"
-version = "0.2.1"
+version = "0.3.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 chrono = "0.4"
 termcolor = "1.1"
+clap = { version = "3.1.18", features = ["derive"] }

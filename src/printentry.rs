@@ -1,17 +1,10 @@
 use std::fs;
 use std::fs::Metadata;
 use std::path::{Path,PathBuf};
+use crate::{Args, Format};
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
-use crate::flags::Flags;
 
 mod colors;
-
-#[derive(Clone)]
-#[derive(Copy)]
-pub enum Format {
-  Si,
-  Iec
-}
 
 #[derive(PartialEq)]
 #[derive(Eq)]
@@ -85,27 +78,27 @@ impl PrintEntry {
     return print_entry
   }
   
-  pub fn print(&self,flags: &Flags) {
-    if !flags.show_sys && self.name.starts_with(".") {
+  pub fn print(&self,args: &Args) {
+    if !args.sys && self.name.starts_with(".") {
       return
     }
     
     print!["{} ",self.obj_type];
   
-    if flags.show_creation_date {
+    if args.creation_date {
       print!["[{}] ",self.creation_date];
     }
     
-    if flags.show_modification_date {
+    if args.modification_date {
       print!["[{}] ",self.modification_date];
     }
     
-    if flags.show_access_date {
+    if args.access_date {
       print!["[{}] ",self.access_date];
     }
     
-    if flags.show_size {
-      print!["[{}] ",get_human_readable_size(flags.format,self.size)];
+    if args.size {
+      print!["[{}] ",get_human_readable_size(args.format,self.size)];
     }
     
     let mut stdout = StandardStream::stdout(ColorChoice::Always);
@@ -123,25 +116,25 @@ impl PrintEntry {
   }
 }
 
-pub fn print_header(flags: &Flags) {
+pub fn print_header(args: &Args) {
   print!["  "];
   
-  if flags.show_creation_date {
+  if args.creation_date {
     print!["{:^22}","Created"];
   }
   
-  if flags.show_modification_date {
+  if args.modification_date {
     print!["{:^22}","Last modified"];
   }
   
-  if flags.show_access_date {
+  if args.access_date {
     print!["{:^22}","Last accessed"];
   }
   
-  if flags.show_size {
-    match flags.format {
+  if args.size {
+    match args.format {
+      Format::Iec => print!["{:^13}","Size"],
       Format::Si => print!["{:^12}","Size"],
-      Format::Iec => print!["{:^13}","Size"]
     };
   }
   
@@ -152,8 +145,8 @@ fn get_human_readable_size(format: Format,bytes: u64) -> String {
   let mut res_string: String = String::new();
   
   let format_infos: (&[&str],f64,usize,usize) = match format {
+    Format::Iec => (IEC_UNITS,1024.0,3,10),
     Format::Si => (SI_UNITS,1000.0,2,9),
-    Format::Iec => (IEC_UNITS,1024.0,3,10)
   };
   
   let mut divided_bytes: f64 = bytes as f64;
