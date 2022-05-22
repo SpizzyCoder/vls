@@ -144,8 +144,12 @@ pub fn print_header(args: &Args) {
 fn get_human_readable_size(format: Format,bytes: u64) -> String {
   let mut res_string: String = String::new();
   
+  // &[&str] - Array of format strings (MiB,GiB, etc)
+  // f64     - Maximum number for wrapping
+  // usize   - Length of the format string with padding
+  // usize   - Length of the whole string
   let format_infos: (&[&str],f64,usize,usize) = match format {
-    Format::Iec => (IEC_UNITS,1024.0,3,10),
+    Format::Iec => (IEC_UNITS,1024.0,3,11),
     Format::Si => (SI_UNITS,1000.0,2,9),
   };
   
