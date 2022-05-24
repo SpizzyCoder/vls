@@ -140,7 +140,7 @@ pub fn print_header(args: &Args) {
   
   if args.size {
     match args.format {
-      Format::Iec => print!["{:^13}","Size"],
+      Format::Iec => print!["{:^14}","Size"],
       Format::Si => print!["{:^12}","Size"],
     };
   }
