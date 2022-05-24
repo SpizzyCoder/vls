@@ -1,12 +1,12 @@
+use std::cmp::Ordering;
 use std::fs;
 use std::fs::Metadata;
-use std::path::{Path,PathBuf};
+use std::path::Path;
 use crate::{Args,Format};
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 mod colors;
 
-#[derive(PartialEq,Eq,PartialOrd,Ord)]
 pub struct PrintEntry {
   obj_type: char,
   name: String,
@@ -15,7 +15,34 @@ pub struct PrintEntry {
   access_date: String,
   size: u64,
   error: Option<String>,
-  path: PathBuf
+  color: Color,
+}
+
+impl PartialEq for PrintEntry {
+  fn eq(&self, other: &Self) -> bool {
+    if self.obj_type == other.obj_type && self.name == other.name {
+      return true
+    }
+
+    return false
+  }
+}
+
+impl Eq for PrintEntry {}
+
+impl Ord for PrintEntry {
+  fn cmp(&self, other: &Self) -> Ordering {
+    let self_tuple: (char,&str) = (self.obj_type,&self.name);
+    let other_tuple: (char,&str) = (other.obj_type,&other.name);
+
+    return self_tuple.cmp(&other_tuple)
+  }
+}
+
+impl PartialOrd for PrintEntry {
+  fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+    Some(self.cmp(other))
+  }
 }
 
 const DATE_TIME_NODATA: &'static str = "---------- --:--:--";
@@ -57,7 +84,7 @@ impl PrintEntry {
         res
       },
       error: None,
-      path: path.to_path_buf()
+      color: colors::get_color(path),
     };
     
     let metadata: Metadata = match fs::metadata(path) {
@@ -113,7 +140,7 @@ impl PrintEntry {
     }
     
     let mut stdout = StandardStream::stdout(ColorChoice::Always);
-    let _ = stdout.set_color(ColorSpec::new().set_fg(Some(colors::get_color(&self.path))));
+    let _ = stdout.set_color(ColorSpec::new().set_fg(Some(self.color)));
     print!["{}",self.name];
     
     if self.error.is_some() {
