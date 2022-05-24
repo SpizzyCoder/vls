@@ -56,10 +56,9 @@ fn main() {
     return
   }
   
-  match list_dir(path,&args) {
-    Ok(_) => {},
-    Err(error) => eprintln!["{}",error]
-  };
+  if let Err(error) = list_dir(path,&args) {
+    eprintln!["{}",error];
+  }
 }
 
 fn list_dir(path: &Path,args: &Args) -> Result<(),String> {
@@ -67,15 +66,17 @@ fn list_dir(path: &Path,args: &Args) -> Result<(),String> {
     Ok(iterator) => iterator,
     Err(error) => return Err(format!["Failed to open {} [Error: {}]",path.display(),error])
   };
-  
-  printentry::print_header(args);
-  
+
   let mut entries: Vec<PrintEntry> = dir_iterator.filter_map(|x| x.ok())
                                                  .map(|x| PrintEntry::new(&x.path()))
                                                  .collect();
-  entries.sort();
+  entries.sort_unstable();
+
+  printentry::print_header(args);
   
-  entries.iter().for_each(|x| x.print(args));
+  for entry in entries {
+    entry.print(args);
+  }
 
   return Ok(())
 }
