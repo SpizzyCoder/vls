@@ -1,5 +1,4 @@
 use std::path::Path;
-use std::ffi::OsStr;
 use termcolor::Color;
 
 const DIR_COLOR: Color = Color::Blue;
@@ -38,13 +37,17 @@ pub fn get_color(path: &Path) -> Color {
     return DIR_COLOR
   }
   
-  let path_extension: Option<&OsStr> = path.extension();
-  
-  if path_extension == None {
-    return FILE_COLOR
-  }
-  
-  let path_extension: String = path_extension.unwrap().to_str().unwrap().to_lowercase();
+  let path_extension: String = {
+    if let Some(os_str) = path.extension() {
+      if let Some(str_extension) = os_str.to_str() {
+        str_extension.to_lowercase()
+      } else {
+        return FILE_COLOR
+      }
+    } else {
+      return FILE_COLOR
+    }
+  };
   
   for extension in IMAGE_EXTENSIONS {
     if path_extension == *extension {

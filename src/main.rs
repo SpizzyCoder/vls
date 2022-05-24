@@ -18,33 +18,33 @@ enum Format {
 #[derive(Parser,Debug)]
 #[clap(version,about)]
 pub struct Args {
-    /// Show creation date
-    #[clap(short,long)]
-    creation_date: bool,
+  /// Show creation date
+  #[clap(short,long)]
+  creation_date: bool,
 
-    /// Show modification date
-    #[clap(short,long)]
-    modification_date: bool,
+  /// Show modification date
+  #[clap(short,long)]
+  modification_date: bool,
 
-    /// Show access date
-    #[clap(short,long)]
-    access_date: bool,
+  /// Show access date
+  #[clap(short,long)]
+  access_date: bool,
 
-    /// Show size
-    #[clap(short,long)]
-    size: bool,
+  /// Show size
+  #[clap(short,long)]
+  size: bool,
 
-    /// Show system files (dotfiles)
-    #[clap(long)]
-    sys: bool,
+  /// Show system files (dotfiles)
+  #[clap(long)]
+  sys: bool,
 
-    /// Format of size
-    #[clap(short,long,arg_enum,default_value_t = Format::Iec)]
-    format: Format,
+  /// Format of size
+  #[clap(short,long,arg_enum,default_value_t = Format::Iec)]
+  format: Format,
 
-    /// Path
-    #[clap(default_value = ".")]
-    path: String,
+  /// Path
+  #[clap(default_value = ".")]
+  path: String,
 }
 
 fn main() {

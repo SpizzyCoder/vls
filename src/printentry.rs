@@ -1,15 +1,12 @@
 use std::fs;
 use std::fs::Metadata;
 use std::path::{Path,PathBuf};
-use crate::{Args, Format};
+use crate::{Args,Format};
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 mod colors;
 
-#[derive(PartialEq)]
-#[derive(Eq)]
-#[derive(PartialOrd)]
-#[derive(Ord)]
+#[derive(PartialEq,Eq,PartialOrd,Ord)]
 pub struct PrintEntry {
   obj_type: char,
   name: String,
@@ -44,7 +41,17 @@ impl PrintEntry {
       modification_date: format!["{}",DATE_TIME_NODATA],
       access_date: format!["{}",DATE_TIME_NODATA],
       size: 0,
-      name: format!["{}",path.file_name().unwrap().to_str().unwrap()],
+      name: {
+        let mut res: String = String::from("---");
+
+        if let Some(os_str) = path.file_name() {
+          if let Some(string) = os_str.to_str() {
+            res = string.to_string();
+          }
+        }
+
+        res
+      },
       error: None,
       path: path.to_path_buf()
     };
