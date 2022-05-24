@@ -20,8 +20,12 @@ pub struct PrintEntry {
 
 const DATE_TIME_NODATA: &'static str = "---------- --:--:--";
 const DATE_TIME_FORMAT: &'static str = "%Y-%m-%d %H:%M:%S";
-const SI_UNITS: &'static [&'static str] = &["B","KB","MB","GB","TB"];
-const IEC_UNITS: &'static [&'static str] = &["B","KiB","MiB","GiB","TiB"];
+const SI_UNITS: &'static [&'static str] = &[" B","KB","MB","GB","TB"];
+const IEC_UNITS: &'static [&'static str] = &["  B","KiB","MiB","GiB","TiB"];
+const SI_NUM_LEN: usize = 6; // 999.00
+const IEC_NUM_LEN: usize = 7; // 1023.00
+const SI_STRLEN: usize = 9; // 999.00 MB
+const IEC_STRLEN: usize = 11; // 1023.00 MiB
 
 impl PrintEntry {
   pub fn new(path: &Path) -> PrintEntry {
@@ -140,8 +144,8 @@ pub fn print_header(args: &Args) {
   
   if args.size {
     match args.format {
-      Format::Iec => print!["{:^14}","Size"],
-      Format::Si => print!["{:^12}","Size"],
+      Format::Iec => print!["{:^1$}","Size",IEC_STRLEN + 3],
+      Format::Si => print!["{:^1$}","Size",SI_STRLEN + 3],
     };
   }
   
@@ -153,20 +157,24 @@ fn get_human_readable_size(format: Format,bytes: u64) -> String {
   
   // &[&str] - Array of format strings (MiB,GiB, etc)
   // f64     - Maximum number for wrapping
-  // usize   - Length of the format string with padding
-  // usize   - Length of the whole string
-  let format_infos: (&[&str],f64,usize,usize) = match format {
-    Format::Iec => (IEC_UNITS,1024.0,3,11),
-    Format::Si => (SI_UNITS,1000.0,2,9),
+  // usize   - Length of num
+  let format_infos: (&[&str],f64,usize) = match format {
+    Format::Iec => (
+      IEC_UNITS,
+      1024.0,
+      IEC_NUM_LEN
+    ),
+    Format::Si => (
+      SI_UNITS,
+      1000.0,
+      SI_NUM_LEN
+    ),
   };
   
   let mut divided_bytes: f64 = bytes as f64;
   for i in 0..format_infos.0.len() {
     if divided_bytes < format_infos.1 {
-      res_string = format!["{:.2} {2:>1$}",divided_bytes,format_infos.2,format_infos.0[i]];
-      while res_string.len() < format_infos.3 {
-        res_string.insert(0,' ');
-      }
+      res_string = format!["{0:1$.2} {2:}",divided_bytes,format_infos.2,format_infos.0[i]];
       break;
     } else {
       divided_bytes /= format_infos.1;
