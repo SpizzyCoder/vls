@@ -10,8 +10,8 @@ mod colors;
 
 const DATE_TIME_NODATA: &'static str = "---------- --:--:--";
 const DATE_TIME_FORMAT: &'static str = "%Y-%m-%d %H:%M:%S";
-const SI_UNITS: &'static [&'static str] = &[" B", "KB", "MB", "GB", "TB"];
-const IEC_UNITS: &'static [&'static str] = &["  B", "KiB", "MiB", "GiB", "TiB"];
+const SI_UNITS: &'static [&'static str] = &[" B", "KB", "MB", "GB", "TB", "PB", "EB"];
+const IEC_UNITS: &'static [&'static str] = &["  B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"];
 const SI_NUM_LEN: usize = 6; // 999.00
 const IEC_NUM_LEN: usize = 7; // 1023.00
 const SI_STRLEN: usize = 9; // 999.00 MB
@@ -208,8 +208,6 @@ pub fn print_header(args: &Args) {
 }
 
 fn get_human_readable_size_as_string(format: Format, bytes: u64) -> String {
-    let mut res_string: String = String::new();
-
     // &[&str] - Array of format strings (MiB,GiB, etc)
     // f64     - Maximum number for wrapping
     // usize   - Length of num
@@ -219,19 +217,20 @@ fn get_human_readable_size_as_string(format: Format, bytes: u64) -> String {
     };
 
     let mut divided_bytes: f64 = bytes as f64;
-    for i in 0..format_infos.0.len() {
-        if divided_bytes < format_infos.1 {
-            res_string = format![
+    let last_index: usize = format_infos.0.len() - 1;
+
+    for i in 0..=last_index {
+        if divided_bytes < format_infos.1 || i == last_index {
+            return format![
                 "{0:1$.2} {2:}",
                 divided_bytes, format_infos.2, format_infos.0[i]
             ];
-            break;
-        } else {
-            divided_bytes /= format_infos.1;
         }
+
+        divided_bytes /= format_infos.1;
     }
 
-    return res_string;
+    unreachable!()
 }
 
 #[cfg(test)]
@@ -264,6 +263,14 @@ mod tests {
             get_human_readable_size_as_string(Format::Iec, 1099511627776),
             "   1.00 TiB"
         );
+        assert_eq!(
+            get_human_readable_size_as_string(Format::Iec, 1125899906842624),
+            "   1.00 PiB"
+        );
+        assert_eq!(
+            get_human_readable_size_as_string(Format::Iec, u64::MAX).len(),
+            IEC_STRLEN
+        );
     }
 
     #[test]
@@ -291,6 +298,14 @@ mod tests {
         assert_eq!(
             get_human_readable_size_as_string(Format::Si, 1000000000000),
             "  1.00 TB"
+        );
+        assert_eq!(
+            get_human_readable_size_as_string(Format::Si, 1000000000000000),
+            "  1.00 PB"
+        );
+        assert_eq!(
+            get_human_readable_size_as_string(Format::Si, u64::MAX).len(),
+            SI_STRLEN
         );
     }
 }
