@@ -135,6 +135,10 @@ impl PrintEntry {
                     .into_iter()
                     .filter_map(|x| x.ok())
                 {
+                    if !entry.file_type().is_file() {
+                        continue;
+                    }
+
                     match entry.metadata() {
                         Ok(metadata) => {
                             print_entry.size += metadata.len();
@@ -242,7 +246,7 @@ fn get_human_readable_size_as_string(format: Format, bytes: u64) -> String {
 mod tests {
     use super::*;
     use std::fs::File;
-    use std::io::ErrorKind;
+    use std::io::{ErrorKind, Write};
     use std::time::{SystemTime, UNIX_EPOCH};
 
     #[test]
@@ -352,5 +356,45 @@ mod tests {
         assert_eq!(get_obj_type(&link), 'S');
 
         let _ = std::fs::remove_dir_all(&temp_root);
+    }
+
+    #[test]
+    fn test_recursive_size_counts_only_files() {
+        let unique = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let temp_root = std::env::temp_dir().join(format!("vls_recursive_size_test_{}", unique));
+        std::fs::create_dir_all(&temp_root).unwrap();
+
+        let nested_dir = temp_root.join("nested");
+        std::fs::create_dir_all(&nested_dir).unwrap();
+
+        let root_file = temp_root.join("root.txt");
+        let mut root_handle = File::create(&root_file).unwrap();
+        root_handle.write_all(b"abc").unwrap();
+
+        let nested_file = nested_dir.join("nested.txt");
+        let mut nested_handle = File::create(&nested_file).unwrap();
+        nested_handle.write_all(b"12345").unwrap();
+        drop(root_handle);
+        drop(nested_handle);
+
+        let args = Args {
+            creation_date: false,
+            modification_date: false,
+            access_date: false,
+            size: true,
+            sys: true,
+            recursive: true,
+            format: Format::Iec,
+            path: String::from("."),
+        };
+
+        let entry = PrintEntry::new(&temp_root, &args);
+
+        let _ = std::fs::remove_dir_all(&temp_root);
+
+        assert_eq!(entry.size, 8);
     }
 }
