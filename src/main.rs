@@ -78,10 +78,12 @@ fn list_dir(path: &Path, args: &Args) -> Result<(), String> {
 
     let mut entries: Vec<PrintEntry> = dir_iterator
         .filter_map(|x| x.ok())
-        .map(|x| PrintEntry::new(&x.path(), &args))
+        .map(|x| x.path())
+        .filter(|path| args.sys || !is_hidden(path))
+        .map(|path| PrintEntry::new(&path, args))
         .collect();
 
-    if entries.len() == 0 {
+    if entries.is_empty() {
         println!["Nothing"];
         return Ok(());
     }
@@ -95,4 +97,21 @@ fn list_dir(path: &Path, args: &Args) -> Result<(), String> {
     }
 
     return Ok(());
+}
+
+fn is_hidden(path: &Path) -> bool {
+    path.file_name()
+        .and_then(|name| name.to_str())
+        .is_some_and(|name| name.starts_with('.'))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_is_hidden() {
+        assert!(is_hidden(Path::new(".env")));
+        assert!(!is_hidden(Path::new("main.rs")));
+    }
 }

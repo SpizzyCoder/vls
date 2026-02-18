@@ -151,10 +151,6 @@ impl PrintEntry {
     }
 
     pub fn print(&self, args: &Args) {
-        if !args.sys && self.name.starts_with(".") {
-            return;
-        }
-
         print!["{} ", self.obj_type];
 
         if args.creation_date {
