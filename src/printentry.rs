@@ -2,6 +2,7 @@ use crate::{Args, Format};
 use std::cmp::Ordering;
 use std::fs;
 use std::fs::Metadata;
+use std::io::Write;
 use std::path::Path;
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 use walkdir::WalkDir;
@@ -155,39 +156,41 @@ impl PrintEntry {
     }
 
     pub fn print(&self, args: &Args) {
-        print!["{} ", self.obj_type];
+        let mut stdout = StandardStream::stdout(ColorChoice::Always);
+
+        let _ = write!(stdout, "{} ", self.obj_type);
 
         if args.creation_date {
-            print!["[{}] ", self.creation_date];
+            let _ = write!(stdout, "[{}] ", self.creation_date);
         }
 
         if args.modification_date {
-            print!["[{}] ", self.modification_date];
+            let _ = write!(stdout, "[{}] ", self.modification_date);
         }
 
         if args.access_date {
-            print!["[{}] ", self.access_date];
+            let _ = write!(stdout, "[{}] ", self.access_date);
         }
 
         if args.size {
-            print![
+            let _ = write!(
+                stdout,
                 "[{}] ",
                 get_human_readable_size_as_string(args.format, self.size)
-            ];
+            );
         }
 
-        let mut stdout = StandardStream::stdout(ColorChoice::Always);
         let _ = stdout.set_color(ColorSpec::new().set_fg(Some(self.color)));
-        print!["{}", self.name];
+        let _ = write!(stdout, "{}", self.name);
 
         if self.error.is_some() {
             let _ = stdout.set_color(ColorSpec::new().set_fg(Some(Color::Red)));
-            print![" -> {}", self.error.as_ref().unwrap()];
+            let _ = write!(stdout, " -> {}", self.error.as_ref().unwrap());
         }
 
         let _ = stdout.reset();
 
-        println![];
+        let _ = writeln!(stdout);
     }
 }
 
