@@ -28,6 +28,25 @@ pub struct PrintEntry {
     color: Color,
 }
 
+fn get_obj_type(path: &Path) -> char {
+    match fs::symlink_metadata(path) {
+        Ok(metadata) => {
+            let file_type = metadata.file_type();
+
+            if file_type.is_symlink() {
+                'S'
+            } else if file_type.is_file() {
+                'F'
+            } else if file_type.is_dir() {
+                'D'
+            } else {
+                'U'
+            }
+        }
+        Err(_) => 'U',
+    }
+}
+
 impl PartialEq for PrintEntry {
     fn eq(&self, other: &Self) -> bool {
         if self.obj_type == other.obj_type && self.name == other.name {
@@ -66,17 +85,7 @@ impl PrintEntry {
         }
 
         let mut print_entry: PrintEntry = PrintEntry {
-            obj_type: {
-                if path.is_file() {
-                    'F'
-                } else if path.is_dir() {
-                    'D'
-                } else if path.is_symlink() {
-                    'S'
-                } else {
-                    'U'
-                }
-            },
+            obj_type: get_obj_type(path),
             creation_date: format!["{}", DATE_TIME_NODATA],
             modification_date: format!["{}", DATE_TIME_NODATA],
             access_date: format!["{}", DATE_TIME_NODATA],
@@ -236,6 +245,9 @@ fn get_human_readable_size_as_string(format: Format, bytes: u64) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs::File;
+    use std::io::ErrorKind;
+    use std::time::{SystemTime, UNIX_EPOCH};
 
     #[test]
     fn test_get_human_readable_size_iec() {
@@ -307,5 +319,42 @@ mod tests {
             get_human_readable_size_as_string(Format::Si, u64::MAX).len(),
             SI_STRLEN
         );
+    }
+
+    #[test]
+    fn test_get_obj_type_symlink_is_s() {
+        let unique = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let temp_root = std::env::temp_dir().join(format!("vls_symlink_test_{}", unique));
+        std::fs::create_dir_all(&temp_root).unwrap();
+
+        let target = temp_root.join("target.txt");
+        File::create(&target).unwrap();
+
+        let link = temp_root.join("link.txt");
+
+        #[cfg(unix)]
+        {
+            std::os::unix::fs::symlink(&target, &link).unwrap();
+        }
+
+        #[cfg(windows)]
+        {
+            if let Err(error) = std::os::windows::fs::symlink_file(&target, &link) {
+                if error.kind() == ErrorKind::PermissionDenied || error.raw_os_error() == Some(1314)
+                {
+                    let _ = std::fs::remove_dir_all(&temp_root);
+                    return;
+                }
+
+                panic!("failed to create symlink: {}", error);
+            }
+        }
+
+        assert_eq!(get_obj_type(&link), 'S');
+
+        let _ = std::fs::remove_dir_all(&temp_root);
     }
 }
