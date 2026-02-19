@@ -15,7 +15,11 @@ enum Format {
 
 /// Simple program to list directories
 #[derive(Parser)]
-#[command(version, about)]
+#[command(
+    version,
+    about,
+    after_help = "License: GNU GPL v3 (or later). See LICENSE for details.\nThis program comes with ABSOLUTELY NO WARRANTY."
+)]
 pub struct Args {
     /// Show creation date
     #[arg(short, long)]
@@ -72,7 +76,7 @@ fn list_dir(path: &Path, args: &Args) -> Result<(), String> {
                 "Failed to open {} [Error: {}]",
                 path.display(),
                 error
-            ])
+            ]);
         }
     };
 
