@@ -1,8 +1,8 @@
-use crate::{Args, Format};
+use crate::{Args, ColorMode, Format};
 use std::cmp::Ordering;
 use std::fs;
 use std::fs::Metadata;
-use std::io::Write;
+use std::io::{IsTerminal, Write};
 use std::path::Path;
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 use walkdir::WalkDir;
@@ -156,7 +156,18 @@ impl PrintEntry {
     }
 
     pub fn print(&self, args: &Args) {
-        let mut stdout = StandardStream::stdout(ColorChoice::Always);
+        let color_choice = match args.color {
+            ColorMode::Always => ColorChoice::Always,
+            ColorMode::Never => ColorChoice::Never,
+            ColorMode::Auto => {
+                if std::io::stdout().is_terminal() {
+                    ColorChoice::Auto
+                } else {
+                    ColorChoice::Never
+                }
+            }
+        };
+        let mut stdout = StandardStream::stdout(color_choice);
 
         let _ = write!(stdout, "{} ", self.obj_type);
 
@@ -391,6 +402,7 @@ mod tests {
             sys: true,
             recursive: true,
             format: Format::Iec,
+            color: ColorMode::Auto,
             path: String::from("."),
         };
 

@@ -13,6 +13,13 @@ enum Format {
     Si,
 }
 
+#[derive(Clone, Copy, ValueEnum)]
+pub enum ColorMode {
+    Auto,
+    Always,
+    Never,
+}
+
 /// Simple program to list directories
 #[derive(Parser)]
 #[command(
@@ -48,6 +55,10 @@ pub struct Args {
     /// Format of size
     #[arg(short, long, value_enum, default_value_t = Format::Iec)]
     format: Format,
+
+    /// Color output mode
+    #[arg(long, value_enum, default_value_t = ColorMode::Auto)]
+    color: ColorMode,
 
     /// Path
     #[arg(default_value = ".")]
